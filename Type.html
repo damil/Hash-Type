@@ -1,0 +1,296 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Hash::Type - pseudo-hashes as arrays tied to a &quot;type&quot;</title>
+<link rev="made" href="mailto:" />
+</head>
+
+<body style="background-color: white">
+
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#methods">METHODS</a></li>
+	<li><a href="#caveats">CAVEATS</a></li>
+	<li><a href="#see_also">SEE ALSO</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+	<li><a href="#copyright_and_license">COPYRIGHT AND LICENSE</a></li>
+</ul>
+<!-- INDEX END -->
+
+<hr />
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>Hash::Type - pseudo-hashes as arrays tied to a ``type'' (list of fields)</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<pre>
+  use Hash::Type;</pre>
+<pre>
+  # create a Hash::Type
+  my $personType = new Hash::Type(qw(firstname lastname city));</pre>
+<pre>
+  # create and populate some hashes tied to $personType
+  tie %wolfgang, $personType, &quot;wolfgang amadeus&quot;, &quot;mozart&quot;, &quot;salzburg&quot;;
+  $ludwig = new $personType (&quot;ludwig&quot;, &quot;van beethoven&quot;, &quot;vienna&quot;);
+  $jsb = new $personType;
+  $jsb-&gt;{city} = &quot;leipzig&quot;;
+  @{$jsb}{qw(firstname lastname)} = (&quot;johann sebastian&quot;, &quot;bach&quot;);</pre>
+<pre>
+  # add fields dynamically
+  $personType-&gt;add(&quot;birth&quot;, &quot;death&quot;) or die &quot;fields not added&quot;;
+  $wolfgang{birth} = 1750;</pre>
+<pre>
+  # More complete example : read a flat file with headers on first line
+  my ($headerline, @datalines) = map {chomp; $_} &lt;F&gt;;
+  my $ht = new Hash::Type(split /\t/, $headerline);
+  foreach my $line (@datalines) {
+    my $data = new $ht(split /\t/, $line);
+    work_with($data-&gt;{someField}, $data-&gt;{someOtherField});
+  }</pre>
+<pre>
+  # an alternative to Time::gmtime and Time::localtime
+  my $timeType = new Hash::Type qw(sec min hour mday mon year wday yday);
+  my $localtime = new $timeType (localtime);
+  my $gmtime = new $timeType (gmtime);
+  print $localtime-&gt;{hour} - $gmtime-&gt;{hour}, &quot; hours difference to GMT&quot;;</pre>
+<pre>
+  # comparison functions
+  my $byAge = $personType-&gt;cmp(&quot;birth : -num, lastname, firstname&quot;);
+  my $byNameLength = $personType-&gt;cmp(lastname =&gt; {length($b) &lt;=&gt; length($a)},
+                                      lastname =&gt; 'alpha', 
+                                      firstname =&gt; 'alpha');
+  showPerson($_) foreach (sort $byAge @people);
+  showPerson($_) foreach (sort $byNameLength @people);</pre>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p>A Hash::Type is a collection of field names.
+Internally, an index is associated with each name.
+Such collections are created dynamically and can be extended.
+They are used to build tied hashes, either through <code>tie</code>
+or through object-oriented method calls; such tied hashes :</p>
+<ul>
+<li></li>
+are 'restricted' (will only accept operations on names previously 
+declared in their Hash::Type)
+<p></p>
+<li></li>
+are implemented internally as arrays (so they use less memory)
+<p></p>
+<li></li>
+can be sorted efficiently through comparison functions generated
+by the class
+<p></p></ul>
+<p>The 'pseudo-hashes' in core Perl were very similar, but they 
+are deprecated starting from Perl 5.8.0. More on comparison
+with other packages in section <a href="#see_also">SEE ALSO</a></p>
+<p>
+</p>
+<hr />
+<h1><a name="methods">METHODS</a></h1>
+<dl>
+<dt><strong><a name="item_type"><code>$myType = new Hash::Type(@names)</code></a></strong><br />
+</dt>
+<dd>
+Creates a new object which holds a collection of names and associated indices
+(technically, this is a hash reference blessed in package Hash::Type). 
+This object can then be used to generate tied hashes.
+The list of <code>@names</code> is optional ; names can be added later through
+method <a href="#item_add"><code>add</code></a>.
+</dd>
+<p></p>
+<dt><strong><a name="item_mytype"><code>$h = new $myType(@vals)</code></a></strong><br />
+</dt>
+<dd>
+Creates a new tied hash associated to package Hash::Type and 
+containing a reference to $myType (technically, this is an array 
+reference, tied to package Hash::Type).
+</dd>
+<dd>
+<p>The other way to create a tied hash is through the <code>tie</code> syntax  :</p>
+</dd>
+<dd>
+<pre>
+  tie %h, $myType, @vals;</pre>
+</dd>
+<dd>
+<p>Access to <code>$h{name}</code> is equivalent to writing</p>
+</dd>
+<dd>
+<pre>
+  tied(%h)-&gt;[$myType-&gt;{name}]</pre>
+</dd>
+<dd>
+<p>so this will generate an error if <code>name</code> was not declared in <code>$myType</code>.</p>
+</dd>
+<dd>
+<p><code>$h{'Hash::Type'}</code> is a special, predefined name that  gives back the object
+to which this hash is tied (you may need it for example to generate a 
+comparison function, see below).</p>
+</dd>
+<dd>
+<p>The operation <code>delete $h{name}</code> is forbidden.
+To delete a value, you have to go to the underlying array :</p>
+</dd>
+<dd>
+<pre>
+  delete tied(%h)-&gt;[$myType-&gt;{name}];</pre>
+</dd>
+<p></p>
+<dt><strong><a name="item_add"><code>$myType-&gt;add(@newNames)</code></a></strong><br />
+</dt>
+<dd>
+Adds @newNames in $myType and gives them new indices. 
+Does nothing for names that were already present.
+Returns the number of names actually added.
+</dd>
+<dd>
+<p>You can also dynamically remove names by writing
+<code>delete $myType-</code>{name}&gt; ; however, this merely
+masks access to {name} for all hashes tied to $myType, 
+so the values are still present in the underlying arrays and 
+you will not gain any memory by doing this.</p>
+</dd>
+<dd>
+<p>After deleting <code>{name}</code>, you can again call 
+<code>$myType-</code>add('name')&gt;, but this will allocate a new index, 
+and not recover the previous one allocated to that key.</p>
+</dd>
+<p></p>
+<dt><strong><a name="item_names"><code>$myType-&gt;names</code></a></strong><br />
+</dt>
+<dd>
+Returns the list of defined names, in index order 
+(which might be different from (keys %$myType)).
+</dd>
+<p></p>
+<dt><strong><a name="item_cmp"><code>$cmp = $myType-&gt;cmp(&quot;f1 : cmp1, f2 : cmp2 , ...&quot;)</code></a></strong><br />
+</dt>
+<dd>
+Returns a reference to an anonymous sub which successively compares
+the given field names, applying the given operators, 
+and returns a positive, negative or zero value.
+This sub can then be fed to <code>sort</code>. 'f1', 'f2', etc are field names,
+'cmp1', 'cmp2' are comparison operators written as :
+</dd>
+<dd>
+<pre>
+  [+|-] [alpha|num|cmp|&lt;=&gt;|d.m.y|d/m/y|y-m-d|...]</pre>
+</dd>
+<dd>
+<p>The sign is '+' for ascending order, '-' for descending; default is '+'.
+Operator 'alpha' is synonym to 'cmp' and 'num' is synonym to '&lt;=&gt;';
+operators 'd.m.y', 'd/m/y', etc. are for dates in various
+formats; default is 'alpha'.</p>
+</dd>
+<dd>
+<p>If all you want is alphabetic ascending order, 
+just write the field names :</p>
+</dd>
+<dd>
+<pre>
+  $cmp = $personType-&gt;cmp('lastname', 'firstname');</pre>
+</dd>
+<dd>
+<p><strong>Note</strong> : <code>sort</code> will not accept something like</p>
+</dd>
+<dd>
+<pre>
+  sort $personType-&gt;cmp('lastname', 'firstname') @people;</pre>
+</dd>
+<dd>
+<p>so you <em>have to</em> store it in a variable first :</p>
+</dd>
+<dd>
+<pre>
+  my $cmp = $personType-&gt;cmp('lastname', 'firstname');
+  sort $cmp @people;</pre>
+</dd>
+<p></p>
+<dt><strong><code>$cmp = $myType-&gt;cmp(f1 =&gt; cmp1, f2 =&gt; cmp2, ...)</code></strong><br />
+</dt>
+<dd>
+This second syntax, with pairs of field names and operators,
+is a bit more verbose but gives you more flexibility, 
+as you can write your own 
+comparison functions using <code>$a</code> and <code>$b</code> :
+</dd>
+<dd>
+<pre>
+  my $byNameLength = $personType-&gt;cmp(lastname =&gt; {length($b) &lt;=&gt; length($a)},
+                                      lastname =&gt; 'alpha', 
+                                      firstname =&gt; 'alpha');</pre>
+</dd>
+<dd>
+<p><strong>Note</strong> : the resulting closure is bound to 
+special variables <code>$a</code> and &lt;$b&gt;. Since those
+are different in each package, you cannot
+pass the comparison function to another 
+package : the call to <code>sort</code> has to be done here.</p>
+</dd>
+<dd>
+<p>For date comparisons, values are parsed into day/month/year, according
+to the shape specified (for example 'd.m.y') will take '.' as
+a separator. Day, month or year need not be several digits, 
+so '1.1.1' will be interpreted as '01.01.2001'. Years of 2 or 1 digits 
+are mapped to 2000 or 1900, with pivot at 33 (so 32 becomes 2032 and
+33 becomes 1933).</p>
+</dd>
+<p></p></dl>
+<p>
+</p>
+<hr />
+<h1><a name="caveats">CAVEATS</a></h1>
+<p>The implementation of 'each', 'keys', 'values' on tied hashes
+calls corresponding operations on the Hash::Type object ; 
+therefore, nested 'each' on several tied hashes won't work.</p>
+<p>
+</p>
+<hr />
+<h1><a name="see_also">SEE ALSO</a></h1>
+<p>The 'pseudo-hashes' documented in <em>perlref</em> are very similar, 
+but are deprecated starting from Perl 5.8.0. 
+Each pseudo-hash holds its own copy of key names in position 0 
+of the underlying array, whereas hashes tied to <code>Hash::Type</code> 
+hold a reference to a shared collection of keys.</p>
+<p>Typed references together with the <code>use fields</code> pragma
+provide support for compile-time translation of key names
+to array indices; see <em>fields</em>. This will be faster, but will
+not help if field names are only known at runtime (like
+in the flat file parsing example of the synopsis).</p>
+<p>For other ways to restrict the keys of a hash to a fixed set, see
+<a href="c:/perl/html//Hash/Util.html#lock_keys">lock_keys in the Hash::Util manpage</a>, <a href="c:/perl/html//Tie/Hash/FixedKeys.html">the Tie::Hash::FixedKeys manpage</a>, <a href="c:/perl/html//Tie/StrictHash.html">the Tie::StrictHash manpage</a>.</p>
+<p>The <a href="c:/perl/html//Sort/Fields.html">the Sort::Fields manpage</a> module in CPAN uses similar techniques for 
+dynamically building sorting criterias according to field
+positions; but it is intended for numbered fields, not
+for named fields, and has no support for caller-supplied
+comparison operators. The design is also a bit different :
+<code>fieldsort</code> does everything at once (splitting, comparing
+and sorting), whereas <code>Hash::Type::cmp</code> only compares, and
+leaves it to the caller to do the rest.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>Laurent Dami, &lt;laurent.dami AT etat  geneve  ch&gt;</p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright_and_license">COPYRIGHT AND LICENSE</a></h1>
+<p>Copyright 2005 by Laurent Dami.</p>
+<p>This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.</p>
+
+</body>
+
+</html>

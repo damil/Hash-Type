@@ -1,0 +1,6 @@
+Revision history for Perl extension Hash::Type.
+
+0.01  Mon Oct 11 05:28:15 2004
+	- original version; created by h2xs 1.22 with options
+		-X Hash::Type
+
