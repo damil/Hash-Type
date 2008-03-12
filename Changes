@@ -1,5 +1,11 @@
 Revision history for Perl extension Hash::Type.
 
+1.08 05.03.2008
+	- remove {}[]() in _cmpDate
+
+1.07 05.11.2007
+        - fix on tied hash FETCH to be usable as an lvalue
+
 1.06 13.01.2006 internal release
 	- remove HTML markup in _cmpDate
 

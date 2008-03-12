@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = "1.06";
+our $VERSION = "1.08";
 
 =head1 NAME
 
@@ -147,10 +147,16 @@ sub STORE    { my $ix = $_[0]->[0]{$_[1]} or
 		 croak "can't STORE, key '$_[1]' was never added to this Hash::Type";
 	       $_[0]->[$ix] = $_[2]; }
 
-sub FETCH    { return $_[0]->[0] if $_[1] eq 'Hash::Type';
-	       my $ix = $_[0]->[0]{$_[1]} or return undef;
-	       $_[0]->[$ix]; }
+# FETCH : must be an lvalue because may be used in $h{field} =~ s/.../../;
+# And since lvalues cannot use "return" (cf. L<perlsub>), we
+# must write intricate ternary ifs -- not nice to read !
 
+sub FETCH : lvalue { 
+  my $ix = $_[0]->[0]{$_[1]};
+  $_[1] eq 'Hash::Type' ? $_[0]->[0] 
+                        : $ix ? $_[0]->[$ix]
+                              : undef;
+}
 
 sub FIRSTKEY { my $a = scalar keys %{$_[0]->[0]}; each %{$_[0]->[0]} }
 sub NEXTKEY  { each %{$_[0]->[0]} }
@@ -331,7 +337,10 @@ sub _dateCmp {
   return 1 if not $date1;	# null date treated as bigger than any other
   return -1 if not $date2;
 
-  s[<.*?>][]g for ($date1, $date2); # remove any markup
+  for my $date ($date1, $date2) {
+    $date =~ s[<.*?>][]g; # remove any markup
+    $date =~ tr/{}[]()//d;  # remove any {}[]() chars
+  }; 
 
   my @d1 = ($date1 =~ $regex) or croak "invalid date '$date1' for regex $regex";
   my @d2 = ($date2 =~ $regex) or croak "invalid date '$date2' for regex $regex";
