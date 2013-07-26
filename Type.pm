@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = "1.08";
+our $VERSION = "1.09";
 
 =head1 NAME
 
@@ -132,7 +132,7 @@ sub new {
     return \%h;
   }
   else { # create a new  Hash::Type object
-    my $self = {};	
+    my $self = {};
     CORE::bless $self, $class;
     $self->add(@_);  # add indices for fields given in @_
     return $self;
@@ -326,7 +326,10 @@ sub cmp {
     }
   }
 
-  return  eval "sub {" . join(" || ", @cmp) . "}" or croak $@;
+  local $@;
+  my $sub = eval "sub {" . join(" || ", @cmp) . "}"
+    or croak $@;
+  return $sub;
 }
 
 

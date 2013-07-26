@@ -1,19 +1,23 @@
 # This Makefile is for the Hash::Type extension to perl.
 #
 # It was generated automatically by MakeMaker version
-# 6.3201 (Revision: 19606) from the contents of
+# 6.64 (Revision: 66400) from the contents of
 # Makefile.PL. Don't edit this file, edit Makefile.PL instead.
 #
 #       ANY CHANGES MADE HERE WILL BE LOST!
 #
 #   MakeMaker ARGV: ()
 #
+
 #   MakeMaker Parameters:
 
 #     ABSTRACT_FROM => q[Type.pm]
-#     AUTHOR => q[Laurent Dami <laurent.dami@etat.ge.ch>]
+#     AUTHOR => [q[Laurent Dami <laurent.dami@etat.ge.ch>]]
+#     BUILD_REQUIRES => {  }
+#     CONFIGURE_REQUIRES => {  }
 #     NAME => q[Hash::Type]
 #     PREREQ_PM => {  }
+#     TEST_REQUIRES => {  }
 #     VERSION_FROM => q[Type.pm]
 
 # --- MakeMaker post_initialize section:
@@ -21,9 +25,8 @@
 
 # --- MakeMaker const_config section:
 
-# These definitions are from config.sh (via d:/Perl/lib/Config.pm)
-
-# They may have been overridden via Makefile.PL or on the command line
+# These definitions are from config.sh (via D:/Strawberry/perl/lib/Config.pm).
+# They may have been overridden via Makefile.PL or on the command line.
 AR = ar
 CC = gcc
 CCCDLFLAGS =  
@@ -33,32 +36,36 @@ DLSRC = dl_win32.xs
 EXE_EXT = .exe
 FULL_AR = 
 LD = g++
-LDDLFLAGS = -mdll -L"d:\perl\lib\CORE"
-LDFLAGS = -L"d:\perl\lib\CORE"
-LIBC = msvcrt.lib
+LDDLFLAGS = -mdll -s -L"D:\Strawberry\perl\lib\CORE" -L"D:\Strawberry\c\lib"
+LDFLAGS = -s -L"D:\Strawberry\perl\lib\CORE" -L"D:\Strawberry\c\lib"
+LIBC = 
 LIB_EXT = .a
 OBJ_EXT = .o
 OSNAME = MSWin32
-OSVERS = 5.00
+OSVERS = 4.0
 RANLIB = rem
-SITELIBEXP = d:\Perl\site\lib
-SITEARCHEXP = d:\Perl\site\lib
+SITELIBEXP = D:\Strawberry\perl\site\lib
+SITEARCHEXP = D:\Strawberry\perl\site\lib
 SO = dll
-VENDORARCHEXP = 
-VENDORLIBEXP = 
+VENDORARCHEXP = D:\Strawberry\perl\vendor\lib
+VENDORLIBEXP = D:\Strawberry\perl\vendor\lib
 
 
 # --- MakeMaker constants section:
+
+# Get dmake to read long commands like PM_TO_BLIB
+MAXLINELENGTH = 65536
+
 AR_STATIC_ARGS = cr
-DIRFILESEP = ^\
+DIRFILESEP = \\
 DFSEP = $(DIRFILESEP)
 NAME = Hash::Type
 NAME_SYM = Hash_Type
-VERSION = 1.08
+VERSION = 1.09
 VERSION_MACRO = VERSION
-VERSION_SYM = 1_08
+VERSION_SYM = 1_09
 DEFINE_VERSION = -D$(VERSION_MACRO)=\"$(VERSION)\"
-XS_VERSION = 1.08
+XS_VERSION = 1.09
 XS_VERSION_MACRO = XS_VERSION
 XS_DEFINE_VERSION = -D$(XS_VERSION_MACRO)=\"$(XS_VERSION)\"
 INST_ARCHLIB = blib\arch
@@ -67,67 +74,60 @@ INST_BIN = blib\bin
 INST_LIB = blib\lib
 INST_MAN1DIR = blib\man1
 INST_MAN3DIR = blib\man3
-INST_HTMLDIR = blib\html
 MAN1EXT = 1
 MAN3EXT = 3
 INSTALLDIRS = site
 DESTDIR = 
 PREFIX = $(SITEPREFIX)
-PERLPREFIX = d:\perl
-SITEPREFIX = d:\perl\site
-VENDORPREFIX = 
-INSTALLPRIVLIB = d:\perl\lib
+PERLPREFIX = D:\Strawberry\perl
+SITEPREFIX = D:\Strawberry\perl\site
+VENDORPREFIX = D:\Strawberry\perl\vendor
+INSTALLPRIVLIB = D:\Strawberry\perl\lib
 DESTINSTALLPRIVLIB = $(DESTDIR)$(INSTALLPRIVLIB)
-INSTALLSITELIB = d:\perl\site\lib
+INSTALLSITELIB = D:\Strawberry\perl\site\lib
 DESTINSTALLSITELIB = $(DESTDIR)$(INSTALLSITELIB)
-INSTALLVENDORLIB = 
+INSTALLVENDORLIB = D:\Strawberry\perl\vendor\lib
 DESTINSTALLVENDORLIB = $(DESTDIR)$(INSTALLVENDORLIB)
-INSTALLARCHLIB = d:\perl\lib
+INSTALLARCHLIB = D:\Strawberry\perl\lib
 DESTINSTALLARCHLIB = $(DESTDIR)$(INSTALLARCHLIB)
-INSTALLSITEARCH = d:\perl\site\lib
+INSTALLSITEARCH = D:\Strawberry\perl\site\lib
 DESTINSTALLSITEARCH = $(DESTDIR)$(INSTALLSITEARCH)
-INSTALLVENDORARCH = 
+INSTALLVENDORARCH = D:\Strawberry\perl\vendor\lib
 DESTINSTALLVENDORARCH = $(DESTDIR)$(INSTALLVENDORARCH)
-INSTALLBIN = d:\perl\bin
+INSTALLBIN = D:\Strawberry\perl\bin
 DESTINSTALLBIN = $(DESTDIR)$(INSTALLBIN)
-INSTALLSITEBIN = d:\perl\site\bin
+INSTALLSITEBIN = D:\Strawberry\perl\site\bin
 DESTINSTALLSITEBIN = $(DESTDIR)$(INSTALLSITEBIN)
-INSTALLVENDORBIN = 
+INSTALLVENDORBIN = D:\Strawberry\perl\bin
 DESTINSTALLVENDORBIN = $(DESTDIR)$(INSTALLVENDORBIN)
-INSTALLSCRIPT = d:\perl\bin
+INSTALLSCRIPT = D:\Strawberry\perl\bin
 DESTINSTALLSCRIPT = $(DESTDIR)$(INSTALLSCRIPT)
-INSTALLSITESCRIPT = $(INSTALLSCRIPT)
+INSTALLSITESCRIPT = D:\Strawberry\perl\site\bin
 DESTINSTALLSITESCRIPT = $(DESTDIR)$(INSTALLSITESCRIPT)
-INSTALLVENDORSCRIPT = 
+INSTALLVENDORSCRIPT = D:\Strawberry\perl\bin
 DESTINSTALLVENDORSCRIPT = $(DESTDIR)$(INSTALLVENDORSCRIPT)
-INSTALLMAN1DIR = d:\perl\man\man1
+INSTALLMAN1DIR = none
 DESTINSTALLMAN1DIR = $(DESTDIR)$(INSTALLMAN1DIR)
 INSTALLSITEMAN1DIR = $(INSTALLMAN1DIR)
 DESTINSTALLSITEMAN1DIR = $(DESTDIR)$(INSTALLSITEMAN1DIR)
-INSTALLVENDORMAN1DIR = 
+INSTALLVENDORMAN1DIR = $(INSTALLMAN1DIR)
 DESTINSTALLVENDORMAN1DIR = $(DESTDIR)$(INSTALLVENDORMAN1DIR)
-INSTALLMAN3DIR = d:\perl\man\man3
+INSTALLMAN3DIR = none
 DESTINSTALLMAN3DIR = $(DESTDIR)$(INSTALLMAN3DIR)
 INSTALLSITEMAN3DIR = $(INSTALLMAN3DIR)
 DESTINSTALLSITEMAN3DIR = $(DESTDIR)$(INSTALLSITEMAN3DIR)
-INSTALLVENDORMAN3DIR = 
+INSTALLVENDORMAN3DIR = $(INSTALLMAN3DIR)
 DESTINSTALLVENDORMAN3DIR = $(DESTDIR)$(INSTALLVENDORMAN3DIR)
-INSTALLHTMLDIR = d:\perl\html
-DESTINSTALLHTMLDIR = $(DESTDIR)$(INSTALLHTMLDIR)
-INSTALLSITEHTMLDIR = d:\perl\html
-DESTINSTALLSITEHTMLDIR = $(DESTDIR)$(INSTALLSITEHTMLDIR)
-INSTALLVENDORHTMLDIR = d:\perl\html
-DESTINSTALLVENDORHTMLDIR = $(DESTDIR)$(INSTALLVENDORHTMLDIR)
-PERL_LIB = d:\Perl\lib
-PERL_ARCHLIB = d:\Perl\lib
+PERL_LIB = D:\Strawberry\perl\lib
+PERL_ARCHLIB = D:\Strawberry\perl\lib
 LIBPERL_A = libperl.a
 FIRST_MAKEFILE = Makefile
 MAKEFILE_OLD = Makefile.old
 MAKE_APERL_FILE = Makefile.aperl
 PERLMAINCC = $(CC)
-PERL_INC = D:\Perl\lib\CORE
-PERL = D:\Perl\bin\perl.exe
-FULLPERL = D:\Perl\bin\perl.exe
+PERL_INC = D:\Strawberry\perl\lib\CORE
+PERL = D:\Strawberry\perl\bin\perl.exe
+FULLPERL = D:\Strawberry\perl\bin\perl.exe
 ABSPERL = $(PERL)
 PERLRUN = $(PERL)
 FULLPERLRUN = $(FULLPERL)
@@ -136,18 +136,19 @@ PERLRUNINST = $(PERLRUN) "-I$(INST_ARCHLIB)" "-I$(INST_LIB)"
 FULLPERLRUNINST = $(FULLPERLRUN) "-I$(INST_ARCHLIB)" "-I$(INST_LIB)"
 ABSPERLRUNINST = $(ABSPERLRUN) "-I$(INST_ARCHLIB)" "-I$(INST_LIB)"
 PERL_CORE = 0
+PERM_DIR = 755
 PERM_RW = 644
 PERM_RWX = 755
 
-MAKEMAKER   = d:/Perl/lib/ExtUtils/MakeMaker.pm
-MM_VERSION  = 6.3201
-MM_REVISION = 19606
+MAKEMAKER   = D:/Strawberry/perl/lib/ExtUtils/MakeMaker.pm
+MM_VERSION  = 6.64
+MM_REVISION = 66400
 
 # FULLEXT = Pathname for extension directory (eg Foo/Bar/Oracle).
 # BASEEXT = Basename part of FULLEXT. May be just equal FULLEXT. (eg Oracle)
 # PARENT_NAME = NAME without BASEEXT and no trailing :: (eg Foo::Bar)
 # DLBASE  = Basename part of dynamic library. May be just equal BASEEXT.
-MAKE = nmake
+MAKE = dmake
 FULLEXT = Hash\Type
 BASEEXT = Type
 PARENT_NAME = Hash
@@ -164,7 +165,7 @@ C_FILES  =
 O_FILES  = 
 H_FILES  = 
 MAN1PODS = 
-MAN3PODS = Type.pm
+MAN3PODS = 
 
 # Where is the Config information that we are using/depend on
 CONFIGDEP = $(PERL_ARCHLIB)$(DFSEP)Config.pm $(PERL_INC)$(DFSEP)config.h
@@ -182,7 +183,7 @@ INST_BOOT        =
 
 # Extra linker info
 EXPORT_LIST        = $(BASEEXT).def
-PERL_ARCHIVE       = $(PERL_INC)\perl58.lib
+PERL_ARCHIVE       = $(PERL_INC)\libperl514.a
 PERL_ARCHIVE_AFTER = 
 
 
@@ -193,12 +194,12 @@ PM_TO_BLIB = Type.pm \
 
 
 # --- MakeMaker platform_constants section:
-MM_Win32_VERSION = 1.1401
+MM_Win32_VERSION = 6.64
 
 
 # --- MakeMaker tool_autosplit section:
 # Usage: $(AUTOSPLITFILE) FileToSplit AutoDirToSplitInto
-AUTOSPLITFILE = $(ABSPERLRUN)  -e "use AutoSplit;  autosplit($$ARGV[0], $$ARGV[1], 0, 1, 1)" --
+AUTOSPLITFILE = $(ABSPERLRUN)  -e "use AutoSplit;  autosplit($$$$ARGV[0], $$$$ARGV[1], 0, 1, 1)" --
 
 
 
@@ -206,27 +207,29 @@ AUTOSPLITFILE = $(ABSPERLRUN)  -e "use AutoSplit;  autosplit($$ARGV[0], $$ARGV[1
 
 
 # --- MakeMaker tools_other section:
-CHMOD = $(ABSPERLRUN) -MExtUtils::Command -e chmod
-CP = $(ABSPERLRUN) -MExtUtils::Command -e cp
-MV = $(ABSPERLRUN) -MExtUtils::Command -e mv
+CHMOD = $(ABSPERLRUN) -MExtUtils::Command -e chmod --
+CP = $(ABSPERLRUN) -MExtUtils::Command -e cp --
+MV = $(ABSPERLRUN) -MExtUtils::Command -e mv --
 NOOP = rem
 NOECHO = @
-RM_F = $(ABSPERLRUN) -MExtUtils::Command -e rm_f
-RM_RF = $(ABSPERLRUN) -MExtUtils::Command -e rm_rf
-TEST_F = $(ABSPERLRUN) -MExtUtils::Command -e test_f
-TOUCH = $(ABSPERLRUN) -MExtUtils::Command -e touch
+RM_F = $(ABSPERLRUN) -MExtUtils::Command -e rm_f --
+RM_RF = $(ABSPERLRUN) -MExtUtils::Command -e rm_rf --
+TEST_F = $(ABSPERLRUN) -MExtUtils::Command -e test_f --
+TOUCH = $(ABSPERLRUN) -MExtUtils::Command -e touch --
 UMASK_NULL = umask 0
 DEV_NULL = > NUL
-MKPATH = $(ABSPERLRUN) "-MExtUtils::Command" -e mkpath
-EQUALIZE_TIMESTAMP = $(ABSPERLRUN) "-MExtUtils::Command" -e eqtime
-ECHO = $(ABSPERLRUN) -l -e "print qq{@ARGV}" --
-ECHO_N = $(ABSPERLRUN)  -e "print qq{@ARGV}" --
+MKPATH = $(ABSPERLRUN) -MExtUtils::Command -e mkpath --
+EQUALIZE_TIMESTAMP = $(ABSPERLRUN) -MExtUtils::Command -e eqtime --
+FALSE = $(ABSPERLRUN)  -e "exit 1" --
+TRUE = $(ABSPERLRUN)  -e "exit 0" --
+ECHO = $(ABSPERLRUN) -l -e "print qq{{@ARGV}}" --
+ECHO_N = $(ABSPERLRUN)  -e "print qq{{@ARGV}}" --
 UNINST = 0
 VERBINST = 0
-MOD_INSTALL = $(ABSPERLRUN) -MExtUtils::Install -e "install({@ARGV}, '$(VERBINST)', 0, '$(UNINST)');" --
-DOC_INSTALL = $(ABSPERLRUN) "-MExtUtils::Command::MM" -e perllocal_install
-UNINSTALL = $(ABSPERLRUN) "-MExtUtils::Command::MM" -e uninstall
-WARN_IF_OLD_PACKLIST = $(ABSPERLRUN) "-MExtUtils::Command::MM" -e warn_if_old_packlist
+MOD_INSTALL = $(ABSPERLRUN) -MExtUtils::Install -e "install([ from_to => {{@ARGV}}, verbose => '$(VERBINST)', uninstall_shadows => '$(UNINST)', dir_mode => '$(PERM_DIR)' ]);" --
+DOC_INSTALL = $(ABSPERLRUN) -MExtUtils::Command::MM -e perllocal_install --
+UNINSTALL = $(ABSPERLRUN) -MExtUtils::Command::MM -e uninstall --
+WARN_IF_OLD_PACKLIST = $(ABSPERLRUN) -MExtUtils::Command::MM -e warn_if_old_packlist --
 MACROSTART = 
 MACROEND = 
 USEMAKEFILE = -f
@@ -234,7 +237,7 @@ FIXIN = pl2bat.bat
 
 
 # --- MakeMaker makemakerdflt section:
-makemakerdflt: all
+makemakerdflt : all
 	$(NOECHO) $(NOOP)
 
 
@@ -254,7 +257,7 @@ RCS_LABEL = rcs -Nv$(VERSION_SYM): -q
 DIST_CP = best
 DIST_DEFAULT = tardist
 DISTNAME = Hash-Type
-DISTVNAME = Hash-Type-1.08
+DISTVNAME = Hash-Type-1.09
 
 
 # --- MakeMaker macro section:
@@ -276,13 +279,14 @@ DISTVNAME = Hash-Type-1.08
 
 
 # --- MakeMaker pasthru section:
-PASTHRU = -nologo
+PASTHRU = 
 
 # --- MakeMaker special_targets section:
 .SUFFIXES : .xs .c .C .cpp .i .s .cxx .cc $(OBJ_EXT)
 
 .PHONY: all config static dynamic test linkext manifest blibdirs clean realclean disttest distdir
 
+.USESHELL :
 
 
 # --- MakeMaker c_o section:
@@ -295,7 +299,7 @@ PASTHRU = -nologo
 
 
 # --- MakeMaker top_targets section:
-all :: pure_all htmlifypods
+all :: pure_all
 	$(NOECHO) $(NOOP)
 
 
@@ -322,42 +326,42 @@ blibdirs.ts : blibdirs
 
 $(INST_LIBDIR)$(DFSEP).exists :: Makefile.PL
 	$(NOECHO) $(MKPATH) $(INST_LIBDIR)
-	$(NOECHO) $(CHMOD) 755 $(INST_LIBDIR)
+	$(NOECHO) $(CHMOD) $(PERM_DIR) $(INST_LIBDIR)
 	$(NOECHO) $(TOUCH) $(INST_LIBDIR)$(DFSEP).exists
 
 $(INST_ARCHLIB)$(DFSEP).exists :: Makefile.PL
 	$(NOECHO) $(MKPATH) $(INST_ARCHLIB)
-	$(NOECHO) $(CHMOD) 755 $(INST_ARCHLIB)
+	$(NOECHO) $(CHMOD) $(PERM_DIR) $(INST_ARCHLIB)
 	$(NOECHO) $(TOUCH) $(INST_ARCHLIB)$(DFSEP).exists
 
 $(INST_AUTODIR)$(DFSEP).exists :: Makefile.PL
 	$(NOECHO) $(MKPATH) $(INST_AUTODIR)
-	$(NOECHO) $(CHMOD) 755 $(INST_AUTODIR)
+	$(NOECHO) $(CHMOD) $(PERM_DIR) $(INST_AUTODIR)
 	$(NOECHO) $(TOUCH) $(INST_AUTODIR)$(DFSEP).exists
 
 $(INST_ARCHAUTODIR)$(DFSEP).exists :: Makefile.PL
 	$(NOECHO) $(MKPATH) $(INST_ARCHAUTODIR)
-	$(NOECHO) $(CHMOD) 755 $(INST_ARCHAUTODIR)
+	$(NOECHO) $(CHMOD) $(PERM_DIR) $(INST_ARCHAUTODIR)
 	$(NOECHO) $(TOUCH) $(INST_ARCHAUTODIR)$(DFSEP).exists
 
 $(INST_BIN)$(DFSEP).exists :: Makefile.PL
 	$(NOECHO) $(MKPATH) $(INST_BIN)
-	$(NOECHO) $(CHMOD) 755 $(INST_BIN)
+	$(NOECHO) $(CHMOD) $(PERM_DIR) $(INST_BIN)
 	$(NOECHO) $(TOUCH) $(INST_BIN)$(DFSEP).exists
 
 $(INST_SCRIPT)$(DFSEP).exists :: Makefile.PL
 	$(NOECHO) $(MKPATH) $(INST_SCRIPT)
-	$(NOECHO) $(CHMOD) 755 $(INST_SCRIPT)
+	$(NOECHO) $(CHMOD) $(PERM_DIR) $(INST_SCRIPT)
 	$(NOECHO) $(TOUCH) $(INST_SCRIPT)$(DFSEP).exists
 
 $(INST_MAN1DIR)$(DFSEP).exists :: Makefile.PL
 	$(NOECHO) $(MKPATH) $(INST_MAN1DIR)
-	$(NOECHO) $(CHMOD) 755 $(INST_MAN1DIR)
+	$(NOECHO) $(CHMOD) $(PERM_DIR) $(INST_MAN1DIR)
 	$(NOECHO) $(TOUCH) $(INST_MAN1DIR)$(DFSEP).exists
 
 $(INST_MAN3DIR)$(DFSEP).exists :: Makefile.PL
 	$(NOECHO) $(MKPATH) $(INST_MAN3DIR)
-	$(NOECHO) $(CHMOD) 755 $(INST_MAN3DIR)
+	$(NOECHO) $(CHMOD) $(PERM_DIR) $(INST_MAN3DIR)
 	$(NOECHO) $(TOUCH) $(INST_MAN3DIR)$(DFSEP).exists
 
 
@@ -406,23 +410,9 @@ POD2MAN_EXE = $(PERLRUN) "-MExtUtils::Command::MM" -e pod2man "--"
 POD2MAN = $(POD2MAN_EXE)
 
 
-manifypods : pure_all  \
-	Type.pm
-	$(NOECHO) $(POD2MAN) --section=3 --perm_rw=$(PERM_RW) \
-	  Type.pm $(INST_MAN3DIR)\Hash\Type.$(MAN3EXT) 
+manifypods : pure_all 
+	$(NOECHO) $(NOOP)
 
-
-
-
-# --- MakeMaker htmlifypods section:
-
-POD2HTML_EXE = $(PERLRUN) "-MActivePerl::DocTools" -e "UpdateHTML_blib(installdirs => "$(INSTALLDIRS)")"
-POD2HTML = $(POD2HTML_EXE)
-
-
-htmlifypods :  \
-	Type.pm
-	$(NOECHO) $(POD2HTML)
 
 
 
@@ -451,14 +441,15 @@ clean :: clean_subdirs
 	  *$(LIB_EXT) core \
 	  core.[0-9] core.[0-9][0-9] \
 	  $(BASEEXT).bso $(INST_ARCHAUTODIR)\extralibs.ld \
-	  pm_to_blib.ts core.[0-9][0-9][0-9][0-9] \
+	  pm_to_blib.ts MYMETA.json \
+	  core.[0-9][0-9][0-9][0-9] MYMETA.yml \
 	  $(BASEEXT).x $(BOOTSTRAP) \
 	  perl$(EXE_EXT) tmon.out \
 	  $(INST_ARCHAUTODIR)\extralibs.all *$(OBJ_EXT) \
 	  pm_to_blib blibdirs.ts \
 	  core.[0-9][0-9][0-9][0-9][0-9] *perl.core \
 	  core.*perl.*.? $(MAKE_APERL_FILE) \
-	  perl $(BASEEXT).def \
+	  $(BASEEXT).def perl \
 	  core.[0-9][0-9][0-9] mon.out \
 	  lib$(BASEEXT).def perlmain.c \
 	  perl.exe so_locations \
@@ -486,20 +477,69 @@ realclean purge ::  clean realclean_subdirs
 # --- MakeMaker metafile section:
 metafile : create_distdir
 	$(NOECHO) $(ECHO) Generating META.yml
-	$(NOECHO) $(ECHO) "--- #YAML:1.0" > META_new.yml
-	$(NOECHO) $(ECHO) "name:                Hash-Type" >> META_new.yml
-	$(NOECHO) $(ECHO) "version:             1.08" >> META_new.yml
-	$(NOECHO) $(ECHO) "abstract:            pseudo-hashes as arrays tied to a \"type\" (list of fields)" >> META_new.yml
-	$(NOECHO) $(ECHO) "license:             ~" >> META_new.yml
-	$(NOECHO) $(ECHO) "generated_by:        ExtUtils::MakeMaker version 6.3201" >> META_new.yml
-	$(NOECHO) $(ECHO) "distribution_type:   module" >> META_new.yml
-	$(NOECHO) $(ECHO) "requires:     " >> META_new.yml
-	$(NOECHO) $(ECHO) "meta-spec:" >> META_new.yml
-	$(NOECHO) $(ECHO) "    url:     http://module-build.sourceforge.net/META-spec-v1.2.html" >> META_new.yml
-	$(NOECHO) $(ECHO) "    version: 1.2" >> META_new.yml
-	$(NOECHO) $(ECHO) "author:" >> META_new.yml
-	$(NOECHO) $(ECHO) "    - Laurent Dami <laurent.dami@etat.ge.ch>" >> META_new.yml
+	$(NOECHO) $(ECHO) --- > META_new.yml
+	$(NOECHO) $(ECHO) "abstract: \"pseudo-hashes as arrays tied to a \\\"type\\\" (list of fields)\"" >> META_new.yml
+	$(NOECHO) $(ECHO) author: >> META_new.yml
+	$(NOECHO) $(ECHO) "  - 'Laurent Dami <laurent.dami@etat.ge.ch>'" >> META_new.yml
+	$(NOECHO) $(ECHO) build_requires: >> META_new.yml
+	$(NOECHO) $(ECHO) "  ExtUtils::MakeMaker: 0" >> META_new.yml
+	$(NOECHO) $(ECHO) configure_requires: >> META_new.yml
+	$(NOECHO) $(ECHO) "  ExtUtils::MakeMaker: 0" >> META_new.yml
+	$(NOECHO) $(ECHO) "dynamic_config: 1" >> META_new.yml
+	$(NOECHO) $(ECHO) "generated_by: 'ExtUtils::MakeMaker version 6.64, CPAN::Meta::Converter version 2.120921'" >> META_new.yml
+	$(NOECHO) $(ECHO) "license: unknown" >> META_new.yml
+	$(NOECHO) $(ECHO) meta-spec: >> META_new.yml
+	$(NOECHO) $(ECHO) "  url: http://module-build.sourceforge.net/META-spec-v1.4.html" >> META_new.yml
+	$(NOECHO) $(ECHO) "  version: 1.4" >> META_new.yml
+	$(NOECHO) $(ECHO) "name: Hash-Type" >> META_new.yml
+	$(NOECHO) $(ECHO) no_index: >> META_new.yml
+	$(NOECHO) $(ECHO) "  directory:" >> META_new.yml
+	$(NOECHO) $(ECHO) "    - t" >> META_new.yml
+	$(NOECHO) $(ECHO) "    - inc" >> META_new.yml
+	$(NOECHO) $(ECHO) "requires: {{}}" >> META_new.yml
+	$(NOECHO) $(ECHO) "version: 1.09" >> META_new.yml
 	-$(NOECHO) $(MV) META_new.yml $(DISTVNAME)/META.yml
+	$(NOECHO) $(ECHO) Generating META.json
+	$(NOECHO) $(ECHO) {{ > META_new.json
+	$(NOECHO) $(ECHO) "   \"abstract\" : \"pseudo-hashes as arrays tied to a \\\"type\\\" (list of fields)\"," >> META_new.json
+	$(NOECHO) $(ECHO) "   \"author\" : [" >> META_new.json
+	$(NOECHO) $(ECHO) "      \"Laurent Dami ^<laurent.dami^@etat.ge.ch^>\"" >> META_new.json
+	$(NOECHO) $(ECHO) "   ]," >> META_new.json
+	$(NOECHO) $(ECHO) "   \"dynamic_config\" : 1," >> META_new.json
+	$(NOECHO) $(ECHO) "   \"generated_by\" : \"ExtUtils::MakeMaker version 6.64, CPAN::Meta::Converter version 2.120921\"," >> META_new.json
+	$(NOECHO) $(ECHO) "   \"license\" : [" >> META_new.json
+	$(NOECHO) $(ECHO) "      \"unknown\"" >> META_new.json
+	$(NOECHO) $(ECHO) "   ]," >> META_new.json
+	$(NOECHO) $(ECHO) "   \"meta-spec\" : {{" >> META_new.json
+	$(NOECHO) $(ECHO) "      \"url\" : \"http://search.cpan.org/perldoc?CPAN::Meta::Spec\"," >> META_new.json
+	$(NOECHO) $(ECHO) "      \"version\" : \"2\"" >> META_new.json
+	$(NOECHO) $(ECHO) "   }}," >> META_new.json
+	$(NOECHO) $(ECHO) "   \"name\" : \"Hash-Type\"," >> META_new.json
+	$(NOECHO) $(ECHO) "   \"no_index\" : {{" >> META_new.json
+	$(NOECHO) $(ECHO) "      \"directory\" : [" >> META_new.json
+	$(NOECHO) $(ECHO) "         \"t\"," >> META_new.json
+	$(NOECHO) $(ECHO) "         \"inc\"" >> META_new.json
+	$(NOECHO) $(ECHO) "      ]" >> META_new.json
+	$(NOECHO) $(ECHO) "   }}," >> META_new.json
+	$(NOECHO) $(ECHO) "   \"prereqs\" : {{" >> META_new.json
+	$(NOECHO) $(ECHO) "      \"build\" : {{" >> META_new.json
+	$(NOECHO) $(ECHO) "         \"requires\" : {{" >> META_new.json
+	$(NOECHO) $(ECHO) "            \"ExtUtils::MakeMaker\" : \"0\"" >> META_new.json
+	$(NOECHO) $(ECHO) "         }}" >> META_new.json
+	$(NOECHO) $(ECHO) "      }}," >> META_new.json
+	$(NOECHO) $(ECHO) "      \"configure\" : {{" >> META_new.json
+	$(NOECHO) $(ECHO) "         \"requires\" : {{" >> META_new.json
+	$(NOECHO) $(ECHO) "            \"ExtUtils::MakeMaker\" : \"0\"" >> META_new.json
+	$(NOECHO) $(ECHO) "         }}" >> META_new.json
+	$(NOECHO) $(ECHO) "      }}," >> META_new.json
+	$(NOECHO) $(ECHO) "      \"runtime\" : {{" >> META_new.json
+	$(NOECHO) $(ECHO) "         \"requires\" : {{}}" >> META_new.json
+	$(NOECHO) $(ECHO) "      }}" >> META_new.json
+	$(NOECHO) $(ECHO) "   }}," >> META_new.json
+	$(NOECHO) $(ECHO) "   \"release_status\" : \"stable\"," >> META_new.json
+	$(NOECHO) $(ECHO) "   \"version\" : \"1.09\"" >> META_new.json
+	$(NOECHO) $(ECHO) }} >> META_new.json
+	-$(NOECHO) $(MV) META_new.json $(DISTVNAME)/META.json
 
 
 # --- MakeMaker signature section:
@@ -521,7 +561,7 @@ manifest :
 	$(PERLRUN) "-MExtUtils::Manifest=mkmanifest" -e mkmanifest
 
 veryclean : realclean
-	$(RM_F) *~ *.orig */*~ */*.orig
+	$(RM_F) *~ */*~ *.orig */*.orig *.bak */*.bak *.old */*.old 
 
 
 
@@ -574,11 +614,9 @@ distdir : create_distdir distmeta
 
 # --- MakeMaker dist_test section:
 disttest : distdir
-	cd $(DISTVNAME)
-	$(ABSPERLRUN) Makefile.PL 
-	$(MAKE) $(PASTHRU)
-	$(MAKE) test $(PASTHRU)
-	cd ..
+	cd $(DISTVNAME) && $(ABSPERLRUN) Makefile.PL 
+	cd $(DISTVNAME) && $(MAKE) $(PASTHRU)
+	cd $(DISTVNAME) && $(MAKE) test $(PASTHRU)
 
 
 
@@ -593,40 +631,36 @@ ci :
 
 # --- MakeMaker distmeta section:
 distmeta : create_distdir metafile
-	$(NOECHO) cd $(DISTVNAME)
-	$(ABSPERLRUN) -MExtUtils::Manifest=maniadd -e "eval { maniadd({q{META.yml} => q{Module meta-data (added by MakeMaker)}}) } \
-    or print \"Could not add META.yml to MANIFEST: $${'@'}\n\"" --
-	cd ..
+	$(NOECHO) cd $(DISTVNAME) && $(ABSPERLRUN) -MExtUtils::Manifest=maniadd -e "exit unless -e q{{META.yml}};\
+eval {{ maniadd({{q{{META.yml}} => q{{Module YAML meta-data (added by MakeMaker)}}}}) }}\
+    or print \"Could not add META.yml to MANIFEST: $$$${{'^@'}}\n\"" --
+	$(NOECHO) cd $(DISTVNAME) && $(ABSPERLRUN) -MExtUtils::Manifest=maniadd -e "exit unless -f q{{META.json}};\
+eval {{ maniadd({{q{{META.json}} => q{{Module JSON meta-data (added by MakeMaker)}}}}) }}\
+    or print \"Could not add META.json to MANIFEST: $$$${{'^@'}}\n\"" --
 
 
 
 # --- MakeMaker distsignature section:
 distsignature : create_distdir
-	$(NOECHO) cd $(DISTVNAME)
-	$(ABSPERLRUN) -MExtUtils::Manifest=maniadd -e "eval { maniadd({q{SIGNATURE} => q{Public-key signature (added by MakeMaker)}}) } \
-    or print \"Could not add SIGNATURE to MANIFEST: $${'@'}\n\"" --
-	cd ..
-	$(NOECHO) cd $(DISTVNAME)
-	$(TOUCH) SIGNATURE
-	cd ..
-	cd $(DISTVNAME)
-	cpansign -s
-	cd ..
+	$(NOECHO) cd $(DISTVNAME) && $(ABSPERLRUN) -MExtUtils::Manifest=maniadd -e "eval {{ maniadd({{q{{SIGNATURE}} => q{{Public-key signature (added by MakeMaker)}}}}) }} \
+    or print \"Could not add SIGNATURE to MANIFEST: $$$${{'^@'}}\n\"" --
+	$(NOECHO) cd $(DISTVNAME) && $(TOUCH) SIGNATURE
+	cd $(DISTVNAME) && cpansign -s
 
 
 
 # --- MakeMaker install section:
 
-install :: all pure_install doc_install doc_update
+install :: pure_install doc_install
 	$(NOECHO) $(NOOP)
 
-install_perl :: all pure_perl_install doc_perl_install
+install_perl :: pure_perl_install doc_perl_install
 	$(NOECHO) $(NOOP)
 
-install_site :: all pure_site_install doc_site_install
+install_site :: pure_site_install doc_site_install
 	$(NOECHO) $(NOOP)
 
-install_vendor :: all pure_vendor_install doc_vendor_install
+install_vendor :: pure_vendor_install doc_vendor_install
 	$(NOECHO) $(NOOP)
 
 pure_install :: pure_$(INSTALLDIRS)_install
@@ -635,16 +669,13 @@ pure_install :: pure_$(INSTALLDIRS)_install
 doc_install :: doc_$(INSTALLDIRS)_install
 	$(NOECHO) $(NOOP)
 
-doc_update ::
-	$(NOECHO) $(PERLRUN) "-MActivePerl::DocTools" -e ActivePerl::DocTools::WriteTOC
-
 pure__install : pure_site_install
 	$(NOECHO) $(ECHO) INSTALLDIRS not defined, defaulting to INSTALLDIRS=site
 
 doc__install : doc_site_install
 	$(NOECHO) $(ECHO) INSTALLDIRS not defined, defaulting to INSTALLDIRS=site
 
-pure_perl_install ::
+pure_perl_install :: all
 	$(NOECHO) $(MOD_INSTALL) \
 		read $(PERL_ARCHLIB)\auto\$(FULLEXT)\.packlist \
 		write $(DESTINSTALLARCHLIB)\auto\$(FULLEXT)\.packlist \
@@ -653,13 +684,12 @@ pure_perl_install ::
 		$(INST_BIN) $(DESTINSTALLBIN) \
 		$(INST_SCRIPT) $(DESTINSTALLSCRIPT) \
 		$(INST_MAN1DIR) $(DESTINSTALLMAN1DIR) \
-		$(INST_MAN3DIR) $(DESTINSTALLMAN3DIR) \
-		$(INST_HTMLDIR) $(DESTINSTALLHTMLDIR)
+		$(INST_MAN3DIR) $(DESTINSTALLMAN3DIR)
 	$(NOECHO) $(WARN_IF_OLD_PACKLIST) \
 		$(SITEARCHEXP)\auto\$(FULLEXT)
 
 
-pure_site_install ::
+pure_site_install :: all
 	$(NOECHO) $(MOD_INSTALL) \
 		read $(SITEARCHEXP)\auto\$(FULLEXT)\.packlist \
 		write $(DESTINSTALLSITEARCH)\auto\$(FULLEXT)\.packlist \
@@ -668,12 +698,11 @@ pure_site_install ::
 		$(INST_BIN) $(DESTINSTALLSITEBIN) \
 		$(INST_SCRIPT) $(DESTINSTALLSITESCRIPT) \
 		$(INST_MAN1DIR) $(DESTINSTALLSITEMAN1DIR) \
-		$(INST_MAN3DIR) $(DESTINSTALLSITEMAN3DIR) \
-		$(INST_HTMLDIR) $(DESTINSTALLSITEHTMLDIR)
+		$(INST_MAN3DIR) $(DESTINSTALLSITEMAN3DIR)
 	$(NOECHO) $(WARN_IF_OLD_PACKLIST) \
 		$(PERL_ARCHLIB)\auto\$(FULLEXT)
 
-pure_vendor_install ::
+pure_vendor_install :: all
 	$(NOECHO) $(MOD_INSTALL) \
 		read $(VENDORARCHEXP)\auto\$(FULLEXT)\.packlist \
 		write $(DESTINSTALLVENDORARCH)\auto\$(FULLEXT)\.packlist \
@@ -682,10 +711,9 @@ pure_vendor_install ::
 		$(INST_BIN) $(DESTINSTALLVENDORBIN) \
 		$(INST_SCRIPT) $(DESTINSTALLVENDORSCRIPT) \
 		$(INST_MAN1DIR) $(DESTINSTALLVENDORMAN1DIR) \
-		$(INST_MAN3DIR) $(DESTINSTALLVENDORMAN3DIR) \
-		$(INST_HTMLDIR) $(DESTINSTALLVENDORHTMLDIR)
+		$(INST_MAN3DIR) $(DESTINSTALLVENDORMAN3DIR)
 
-doc_perl_install ::
+doc_perl_install :: all
 	$(NOECHO) $(ECHO) Appending installation info to $(DESTINSTALLARCHLIB)/perllocal.pod
 	-$(NOECHO) $(MKPATH) $(DESTINSTALLARCHLIB)
 	-$(NOECHO) $(DOC_INSTALL) \
@@ -696,7 +724,7 @@ doc_perl_install ::
 		EXE_FILES "$(EXE_FILES)" \
 		>> $(DESTINSTALLARCHLIB)\perllocal.pod
 
-doc_site_install ::
+doc_site_install :: all
 	$(NOECHO) $(ECHO) Appending installation info to $(DESTINSTALLARCHLIB)/perllocal.pod
 	-$(NOECHO) $(MKPATH) $(DESTINSTALLARCHLIB)
 	-$(NOECHO) $(DOC_INSTALL) \
@@ -707,7 +735,7 @@ doc_site_install ::
 		EXE_FILES "$(EXE_FILES)" \
 		>> $(DESTINSTALLARCHLIB)\perllocal.pod
 
-doc_vendor_install ::
+doc_vendor_install :: all
 	$(NOECHO) $(ECHO) Appending installation info to $(DESTINSTALLARCHLIB)/perllocal.pod
 	-$(NOECHO) $(MKPATH) $(DESTINSTALLARCHLIB)
 	-$(NOECHO) $(DOC_INSTALL) \
@@ -719,7 +747,7 @@ doc_vendor_install ::
 		>> $(DESTINSTALLARCHLIB)\perllocal.pod
 
 
-uninstall :: uninstall_from_$(INSTALLDIRS)dirs doc_update
+uninstall :: uninstall_from_$(INSTALLDIRS)dirs
 	$(NOECHO) $(NOOP)
 
 uninstall_from_perldirs ::
@@ -734,7 +762,7 @@ uninstall_from_vendordirs ::
 
 # --- MakeMaker force section:
 # Phony target to force checking subdirectories.
-FORCE:
+FORCE :
 	$(NOECHO) $(NOOP)
 
 
@@ -753,7 +781,7 @@ $(FIRST_MAKEFILE) : Makefile.PL $(CONFIGDEP)
 	$(PERLRUN) Makefile.PL 
 	$(NOECHO) $(ECHO) "==> Your Makefile has been rebuilt. <=="
 	$(NOECHO) $(ECHO) "==> Please rerun the $(MAKE) command.  <=="
-	false
+	$(FALSE)
 
 
 
@@ -761,7 +789,7 @@ $(FIRST_MAKEFILE) : Makefile.PL $(CONFIGDEP)
 
 # --- MakeMaker makeaperl section ---
 MAP_TARGET    = perl
-FULLPERL      = D:\Perl\bin\perl.exe
+FULLPERL      = D:\Strawberry\perl\bin\perl.exe
 
 $(MAP_TARGET) :: static $(MAKE_APERL_FILE)
 	$(MAKE) $(USEMAKEFILE) $(MAKE_APERL_FILE) $@
@@ -784,7 +812,11 @@ TESTDB_SW = -d
 
 testdb :: testdb_$(LINKTYPE)
 
-test :: $(TEST_TYPE)
+test :: $(TEST_TYPE) subdirs-test
+
+subdirs-test ::
+	$(NOECHO) $(NOOP)
+
 
 test_dynamic :: pure_all
 	$(FULLPERLRUN) "-MExtUtils::Command::MM" "-e" "test_harness($(TEST_VERBOSE), '$(INST_LIB)', '$(INST_ARCHLIB)')" $(TEST_FILES)
@@ -800,23 +832,21 @@ testdb_static :: testdb_dynamic
 
 # --- MakeMaker ppd section:
 # Creates a PPD (Perl Package Description) for a binary distribution.
-ppd:
-	$(NOECHO) $(ECHO) "<SOFTPKG NAME=\"$(DISTNAME)\" VERSION=\"1,08,0,0\">" > $(DISTNAME).ppd
-	$(NOECHO) $(ECHO) "    <TITLE>$(DISTNAME)</TITLE>" >> $(DISTNAME).ppd
+ppd :
+	$(NOECHO) $(ECHO) "<SOFTPKG NAME=\"$(DISTNAME)\" VERSION=\"$(VERSION)\">" > $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) "    <ABSTRACT>pseudo-hashes as arrays tied to a \"type\" (list of fields)</ABSTRACT>" >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) "    <AUTHOR>Laurent Dami &lt;laurent.dami@etat.ge.ch&gt;</AUTHOR>" >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) "    <IMPLEMENTATION>" >> $(DISTNAME).ppd
-	$(NOECHO) $(ECHO) "        <OS NAME=\"$(OSNAME)\" />" >> $(DISTNAME).ppd
-	$(NOECHO) $(ECHO) "        <ARCHITECTURE NAME=\"MSWin32-x86-multi-thread-5.8\" />" >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) "        <ARCHITECTURE NAME=\"MSWin32-x64-multi-thread-5.14\" />" >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) "        <CODEBASE HREF=\"\" />" >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) "    </IMPLEMENTATION>" >> $(DISTNAME).ppd
-	$(NOECHO) $(ECHO) "</SOFTPKG>" >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) ^</SOFTPKG^> >> $(DISTNAME).ppd
 
 
 # --- MakeMaker pm_to_blib section:
 
-pm_to_blib : $(TO_INST_PM)
-	$(NOECHO) $(ABSPERLRUN) -MExtUtils::Install -e "pm_to_blib({@ARGV}, '$(INST_LIB)\auto', '$(PM_FILTER)')" -- \
+pm_to_blib : $(FIRST_MAKEFILE) $(TO_INST_PM)
+	$(NOECHO) $(ABSPERLRUN) -MExtUtils::Install -e "pm_to_blib({{@ARGV}}, '$(INST_LIB)\auto', q[$(PM_FILTER)], '$(PERM_DIR)')" -- \
 	  Type.pm $(INST_LIB)\Hash\Type.pm 
 	$(NOECHO) $(TOUCH) pm_to_blib
 

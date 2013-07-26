@@ -1,5 +1,8 @@
 Revision history for Perl extension Hash::Type.
 
+1.09 29.07.2013
+        - fix rt #87309 : return .. or .. would never reach the "or" part
+
 1.08 05.03.2008
 	- remove {}[]() in _cmpDate
 
