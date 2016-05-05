@@ -2,8 +2,6 @@ use strict;
 use warnings;
 use Test::More tests => 6;
 
-use lib "../blib/lib"; # TODO REMOVE
-
 use Hash::Type;
 
 

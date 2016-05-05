@@ -2,9 +2,6 @@ use strict;
 use warnings;
 use Test::More tests => 40 ;
 
-use lib "../blib/lib"; # TODO REMOVE
-
-
 BEGIN {use_ok("Hash::Type");}
 
 # create a new hash type
