@@ -1,5 +1,12 @@
 Revision history for Perl extension Hash::Type.
 
+2.00 
+        - also behaves as an ordered hash (new NEXTKEY implementation)
+        - new methods: values() and each()
+        - nested loops with each()/keys()/values() are now supported
+        - some readability improvements in code
+        - modernized documentation
+
 1.09 29.07.2013
         - fix rt #87309 : return .. or .. would never reach the "or" part
 

@@ -1,6 +1,9 @@
 use strict;
 use warnings;
-use Test::More tests => 37 ;
+use Test::More tests => 40 ;
+
+use lib "../blib/lib"; # TODO REMOVE
+
 
 BEGIN {use_ok("Hash::Type");}
 
@@ -46,16 +49,40 @@ ok(eq_hash($jsb, {firstname => "johann sebastian",
 # dynamically add field names to a hash type; applies to all tied hashes
 is($personType->add("lastname", "birth", "death", "birth"), 2, "2 new names");
 
-ok(eq_set([keys %$personType], 
-	  [qw(firstname lastname city birth death)]), "proper set of names");
-
 
 #test the 'names' method
-
 ok(eq_array([$personType->names],
 	    [qw(firstname lastname city birth death)]), "proper method 'names'");
 
+# keys on the tied hash
+ok(eq_array([keys %wolfgang],
+	    [qw(firstname lastname city birth death)]), "keys on tied hash");
 
+
+# test the 'values' method
+ok(eq_array([$personType->values(\%wolfgang)],
+	    ["wolfgang amadeus", "mozart", "salzburg", undef, undef]),
+   "values method");
+
+
+# values on the tied hash
+ok(eq_array([values %wolfgang],
+	    ["wolfgang amadeus", "mozart", "salzburg", undef, undef]),
+   "values on tied hash");
+
+# test the 'each' method
+my $iter = $personType->each(\%wolfgang);
+my @list1;
+while (my ($k, $v) = $iter->()) {
+  no warnings 'uninitialized';
+  push @list1, "$k: $v";
+}
+my @list2;
+while (my ($k, $v) = each %wolfgang) {
+  no warnings 'uninitialized';
+  push @list2, "$k: $v";
+}
+is_deeply(\@list1, \@list2, "'each' method");
 
 
 $wolfgang{birth} = 1750;
@@ -143,3 +170,6 @@ ok((not exists $jsb->{city}), "city field was really deleted");
 
 delete tied(%$jsb)->[$personType->{firstname}];
 is($jsb->{firstname}, undef, "jsb lost his name");
+
+
+
