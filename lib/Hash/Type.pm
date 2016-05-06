@@ -37,7 +37,7 @@ sub new { # this is a polymorphic 'new', creating either Hash::Type instances
 #----------------------------------------------------------------------
 # tied hash implementation
 #----------------------------------------------------------------------
-sub TIEHASH  { bless [@_]                                                  }
+sub TIEHASH  { bless [@_], __PACKAGE__                                     }
 sub STORE    { my $index = $_[0]->[0]{$_[1]} or
 		 croak "can't STORE, key '$_[1]' was never added "
                      . "to this Hash::Type";
@@ -202,7 +202,7 @@ __END__
 
 =head1 NAME
 
-Hash::Type - pseudo-hashes as arrays tied to a "type" (list of fields)
+Hash::Type - restricted, ordered hashes as arrays tied to a "type" (shared list of keys)
 
 =head1 SYNOPSIS
 
@@ -212,7 +212,7 @@ Hash::Type - pseudo-hashes as arrays tied to a "type" (list of fields)
   my $person_type = Hash::Type->new(qw/firstname lastname city/);
 
   # create and populate some hashes tied to $person_type
-  tie %wolfgang, $person_type, "wolfgang amadeus", "mozart", "salzburg";
+  tie my(%wolfgang), $person_type, "wolfgang amadeus", "mozart", "salzburg";
   my $ludwig = $person_type->new("ludwig", "van beethoven", "vienna");
   my $jsb    = $person_type->new;
   $jsb->{city} = "leipzig";
@@ -223,8 +223,8 @@ Hash::Type - pseudo-hashes as arrays tied to a "type" (list of fields)
   $wolfgang{birth} = 1750;
 
   # get back ordered names or values
-  my @fields = $person_type->names;
-  my @vals   = $person_type->values(\%wolfgang);
+  my @fields = $person_type->names;              # same as: keys %wolfgang
+  my @vals   = $person_type->values(\%wolfgang); # same as: values %wolfgang
 
   # More complete example : read a flat file with headers on first line
   my ($headerline, @datalines) = map {chomp; $_} <F>;
@@ -232,6 +232,15 @@ Hash::Type - pseudo-hashes as arrays tied to a "type" (list of fields)
   foreach my $line (@datalines) {
     my $data = $ht->new(split /\t/, $line);
     work_with($data->{some_field}, $data->{some_other_field});
+  }
+
+  # get many lines from a DBI database
+  my $sth = $dbh->prepare($sql);
+  $sth->execute;
+  my $ht = Hash::Type->new(@{$sth->{NAME}});
+  while (my $r = $sth->fetchrow_arrayref) {
+    my $row = $ht->new(@$r);
+    work_with($row);
   }
 
   # an alternative to Time::gmtime and Time::localtime
@@ -264,8 +273,8 @@ Hash::Type - pseudo-hashes as arrays tied to a "type" (list of fields)
 =head1 DESCRIPTION
 
 An instance of C<Hash::Type>  encapsulates a collection of field names,
-and is used to generate B<tied hashes>, implemented internally as arrayrefs,
-and B<sharing> the common list of fields.
+and is used to generate tied hashes, implemented internally as arrayrefs,
+and sharing the common list of fields.
 
 The original motivation for this design was to spare memory, since the
 field names are shared. As it turns out, benchmarks show that this
@@ -273,13 +282,14 @@ goal is not attained : memory usage is about 35% higher than Perl
 native hashes.  However, this module also implements B<restricted
 hashes> (hashes with a fixed set of keys that cannot be expanded) and
 of B<ordered hashes> (the list of keys or list values are returned in
-a fixed order; and for those two functionalities, the performances of
+a fixed order); and for those two functionalities, the performances of
 C<Hash::Type> are very competitive with respect to those of other
 similar modules, both in terms of CPU and memory usage (see the
 L</"BENCHMARKS"> section at the end of the documentation). In
 addition, C<Hash::Type> offers an API for B<convenient and very
-efficient sorting> of lists of tied hashes, and methods for faster
-implementations of C<keys>, C<values> and C<each>.
+efficient sorting> of lists of tied hashes, and alternative
+methods for C<keys>, C<values> and C<each>, faster than the L</perltie>
+API.
 
 In conclusion, this module is well suited for any need of restricted
 and/or ordered hashes, and for situations dealing with large
@@ -327,7 +337,8 @@ without any check that this is a real scalar classname.
 
 =head3 Accessing names in tied hashes
 
-Access to C<$hash{name}> is equivalent to writing
+Access to C<$hash{name}> works like for a regular Perl hash.
+It is equivalent to writing
 
   tied(%hash)->[$h_type->{name}]
 
@@ -343,6 +354,16 @@ break the consistency of the internal arrayref. Any attempt to
 delete a name will generate an exception. Of course it is always
 possible to set a field to C<undef>.
 
+=head3 Iterating on keys
+
+Standard Perl operations C<keys>, C<values> and C<each> on tied
+hashes preserve the order in which names were added to the
+C<Hash::Type> instance.
+
+The same behavior can be obtained through object-oriented method
+calls, described below.
+
+
 =head2 add
 
   $h_type->add(@new_names);
@@ -353,7 +374,7 @@ Returns the number of names actually added.
 
 Existing hashes already tied to C<$h_type> are not touched; their
 internal arrayrefs are not expanded, but the new fields will spring
-into existence as soon as they are assigned a value, 
+into existence as soon as they are assigned a value,
 thanks to Perl's auto-vivification mechanism.
 
 =head2 names
@@ -361,7 +382,7 @@ thanks to Perl's auto-vivification mechanism.
   my @headers = $h_type->names;
 
 Returns the list of defined names, in index order.
-This is the same list as C<keys %hash>, but faster
+This is the same list as C<keys %hash>, but computed faster
 because it directly returns a copy of the underlying name array
 instead of having to iterate through the keys.
 
@@ -370,7 +391,7 @@ instead of having to iterate through the keys.
   my @vals = $h_type->values(\%hash);
 
 Returns the list of values in C<%hash>, in index order.
-This is the same list as C<values %hash>, but faster.
+This is the same list as C<values %hash>, but computed faster.
 
 =head2 each
 
@@ -382,7 +403,7 @@ This is the same list as C<values %hash>, but faster.
 Returns an iterator function that yields pairs of
 ($key, $value) at each call, until reaching an empty list
 at the end of the tied hash.
-This is the same as calling C<each %hash>, but faster.
+This is the same as calling C<each %hash>, but works faster.
 
 =head2 cmp
 
@@ -401,7 +422,12 @@ This sub can then be fed to C<sort>. 'f1', 'f2', etc are field names,
 The sign is '+' for ascending order, '-' for descending; default is '+'.
 Operator 'alpha' is synonym to 'cmp' and 'num' is synonym to '<=>';
 operators 'd.m.y', 'd/m/y', etc. are for dates in various
-formats; default is 'alpha'.
+formats; default is 'alpha'. So for example
+
+  my $cmp = $h_type->cmp("foo : -alpha, bar : num");
+
+will sort alphabetically on C<foo> in descending order; in case of identical
+values for the C<foo> field, it will sort numerically on the C<bar> field.
 
 If all you want is alphabetic ascending order, 
 just write the field names :
@@ -439,10 +465,11 @@ as you can write your own comparison functions using C<$a> and C<$b> :
   );
 
 B<Note> : the resulting closure is bound to
-the special variables C<$a> and <$b>. Since those
+the special variables C<$a> and C<$b>. Since those
 are different in each package, you cannot
 pass the comparison function to another
-package : the call to C<sort> has to be done here.
+package : the call to C<sort> has to be done in the package where the 
+comparison function was compiled.
 
 
 =head1 INTERNALS
@@ -458,7 +485,6 @@ that this private key would cause a conflict, it can be changed
 by setting C<$Hash::Type::reserved_keys_field> to a different value.
 
 Tied hashes are implemented as arrayrefs, in which slot 0 points
-
 to the C<Hash::Type> instance, and slots 1 to I<n> are the values
 for the named fields.
 
@@ -513,7 +539,7 @@ A benchmark program is supplied within the distribution to compare
 performances of C<Hash::Type> to some other solutions. Compared
 operations were hash creation, data access, data update, sorting,
 and deletion, varying the number of tied hashes, the number of keys,
-and also the length of hash keys (surprisingly, this makes a difference!).
+and also the length of hash keys (surprisingly, this can make a difference!).
 
 To give an idea, here are just a few results :
 
@@ -546,10 +572,10 @@ To give an idea, here are just a few results :
 
 The conclusions (confirmed by other results not displayed here) are
 that C<Hash::Type> is quite reasonable in CPU and memory usage, with
-respect to other modules implementing ordered hashes. It is especially good
-at sorting, but this due to its API allowing to I<compile> a sorting
-function before applying it to a list of hashes. It even sometimes outperforms
-perl core hashes on creation time.
+respect to other modules implementing ordered hashes. It even
+sometimes outperforms perl core hashes on creation time. It is
+especially good at sorting, but this due to its API allowing to
+I<compile> a sorting function before applying it to a list of hashes.
 
 Among the competitors L<Tie::Hash::Indexed> is the fastest, which is
 not suprising as it is implemented in XS, while all other are
@@ -557,11 +583,12 @@ implemented in pure Perl; notice however that this module is quite
 costly in terms of memory.
 
 L<Tie::IxHash>, which was among the first modules on CPAN for
-ordered hashes, is definitely slow and greedy for memory.
+ordered hashes, is definitely the slowest and is quite greedy for memory.
 
 L<Hash::Ordered>, a more recent proposal, sits in the middle; however, it
 should be noted that the benchmark was based on its L</perltie> API, which
-is probably not the most efficient way to use the module. 
+is probably not the most efficient way to use this module.
+
 
 =head1 AUTHOR
 
