@@ -1,21 +1,33 @@
-Hash/Type version 1.05
+Hash/Type version 2.0
 ======================
 
-Hash::Type - pseudo-hashes as arrays tied to a "type" (list of fields)
+Hash::Type - restricted, ordered hashes as arrays tied to a "type"
+             (shared list of keys)
 
-A Hash::Type is a collection of field names.
-Internally, an index is associated with each name.
-Such collections are created dynamically and can be extended.
-They are used to build tied hashes, either through C<tie>
-or through object-oriented method calls; such tied hashes :
 
-- are 'restricted' (will only accept operations on names previously 
-  declared in their Hash::Type)
+An instance of C<Hash::Type>  encapsulates a collection of field names,
+and is used to generate tied hashes, implemented internally as arrayrefs,
+and sharing the common list of fields.
 
-- are implemented internally as arrays (so they use less memory)
+The original motivation for this design was to spare memory, since the
+field names are shared. As it turns out, benchmarks show that this
+goal is not attained : memory usage is about 35% higher than Perl
+native hashes.  However, this module also implements B<restricted
+hashes> (hashes with a fixed set of keys that cannot be expanded) and
+of B<ordered hashes> (the list of keys or list values are returned in
+a fixed order); and for those two functionalities, the performances of
+C<Hash::Type> are very competitive with respect to those of other
+similar modules, both in terms of CPU and memory usage (see the
+L</"BENCHMARKS"> section at the end of the documentation). In
+addition, C<Hash::Type> offers an API for B<convenient and very
+efficient sorting> of lists of tied hashes, and alternative
+methods for C<keys>, C<values> and C<each>, faster than the L</perltie>
+API.
 
-- can be sorted efficiently through comparison functions generated
-  and compiled by the class
+In conclusion, this module is well suited for any need of restricted
+and/or ordered hashes, and for situations dealing with large
+collections of homogeneous hashes, like for example data rows coming from
+spreadsheets or databases.
 
 
 INSTALLATION
@@ -33,7 +45,7 @@ None
 
 COPYRIGHT AND LICENCE
 
-Copyright (C) 2004, 2005 Laurent Dami
+Copyright (C) 2004-2016 Laurent Dami
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself. 
