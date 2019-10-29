@@ -6,6 +6,7 @@ WriteMakefile(
   VERSION_FROM   => 'lib/Hash/Type.pm',
   PREREQ_PM      => {},
   ABSTRACT_FROM  => 'lib/Hash/Type.pm',
+  LICENSE        => 'perl_5',
   AUTHOR         => 'Laurent Dami <dami@cpan.org>',
   META_MERGE => {
    resources => {
