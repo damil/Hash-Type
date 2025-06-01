@@ -1,11 +1,11 @@
 use strict;
 use warnings;
-use Test::More tests => 40 ;
+use Test::More;
 
 BEGIN {use_ok("Hash::Type");}
 
 # create a new hash type
-my $personType = new Hash::Type(qw(firstname lastname city));
+my $personType = Hash::Type->new(qw(firstname lastname city));
 
 isa_ok($personType, 'Hash::Type');
 
@@ -23,7 +23,7 @@ is($wolfgang{lastname}, "mozart", "wolfgang lastname");
 
 
 # 2) use object-oriented syntax
-my $ludwig = new $personType ("ludwig", "van beethoven", "vienna");
+my $ludwig = $personType->new("ludwig", "van beethoven", "vienna");
 
 isa_ok($ludwig, 'HASH');
 
@@ -34,7 +34,7 @@ is(tied(%$ludwig)->[1], "ludwig", "tied ludwig 1");
 
 
 # 3) create an empty tied hash and fill the values later
-my $jsb = new $personType;
+my $jsb = $personType->new;
 $jsb->{city} = "leipzig";
 @{$jsb}{qw(firstname lastname)} = ("johann sebastian", "bach");
 
@@ -45,6 +45,16 @@ ok(eq_hash($jsb, {firstname => "johann sebastian",
 
 # dynamically add field names to a hash type; applies to all tied hashes
 is($personType->add("lastname", "birth", "death", "birth"), 2, "2 new names");
+
+
+
+
+# instanciate
+my @organists = $personType->instantiate($jsb, 
+                                         ["Johann Jakob", "Froberger", "Stuttgart", 1616],
+                                         {firstname => 'Girolamo', lastname => 'Frescobaldi', birth => 1583});
+is_deeply [map {$_->{lastname}} @organists], [qw/bach Froberger Frescobaldi/], 'instanciate';
+
 
 
 #test the 'names' method
@@ -106,9 +116,9 @@ ok($@, "setting ->{'Hash::Type'} is forbidden : $@");
 
 
 # B) replace Time::gmtime and Time::localtime
-my $timeType = new Hash::Type qw(sec min hour mday mon year wday yday);
-my $localtime = new $timeType (localtime);
-my $gmtime = new $timeType (gmtime);
+my $timeType  = Hash::Type->new(qw(sec min hour mday mon year wday yday));
+my $localtime = $timeType->new(localtime);
+my $gmtime    = $timeType->new(gmtime);
 my $diff = $localtime->{hour} - $gmtime->{hour};
 ok("$diff hours difference to GMT");
 
@@ -129,7 +139,7 @@ ok($@, "die on calling 'add' on a tied hash: $@");
 no warnings 'uninitialized';
 
 my @people = (\%wolfgang, $ludwig, $jsb,
-	      new $personType (qw(claudio monteverdi mantova 1567)));
+	      $personType->new(qw(claudio monteverdi mantova 1567)));
 
 my $byAge = $personType->cmp("birth : -num, lastname, firstname");
 
@@ -157,16 +167,41 @@ is($wolfgang{lastname}, undef, 'wolfgang array is cleared');
 
 
 # test the DELETE function
-
 eval {delete $jsb->{city};};
 ok($@, "delete forbidden on tied hash : $@");
-
 ok(delete $personType->{city}, "delete OK on $personType");
-
 ok((not exists $jsb->{city}), "city field was really deleted");
-
 delete tied(%$jsb)->[$personType->{firstname}];
 is($jsb->{firstname}, undef, "jsb lost his name");
 
 
+# ->delete() and ->clone() functions
+my $abcd_type = Hash::Type->new(qw/a b c d/);
+my $clone     = $abcd_type->clone;
+my @records   = ($abcd_type->new(1, 2, 3, 4), $abcd_type->new(5, 6, 7, 8));
+my $mutator   = $abcd_type->delete(qw/d b d foo/);
+$mutator->($_) foreach @records;
+is_deeply \@records, [{a => 1, c => 3}, {a => 5, c => 7}], '->delete() operation';
+is_deeply [$clone->names], [qw/a b c d/],                  '->clone() operation';
 
+# ->reorder() function
+$abcd_type = Hash::Type->new(qw/a b c d/);
+@records   = ($abcd_type->new(1, 2, 3, 4), $abcd_type->new(5, 6, 7, 8));
+$mutator   = $abcd_type->reorder(qw/d b/);
+$mutator->($_) foreach @records;
+is_deeply [$abcd_type->names], [qw/d b a c/],              'reordered names';
+is_deeply [values %{$records[0]}], [4, 2, 1, 3],           'reordered values';
+is_deeply \@records, [{a => 1, b => 2, c => 3, d => 4},
+                      {a => 5, b => 6, c => 7, d => 8}],   'reordered hashes';
+
+# ->rename() function
+$abcd_type = Hash::Type->new(qw/a b c d/);
+@records   = ($abcd_type->new(1, 2, 3, 4), $abcd_type->new(5, 6, 7, 8));
+$abcd_type->rename(a => 'x', b => 'c', c => 'b');
+is_deeply [$abcd_type->names], [qw/x c b d/],              'renamed cols';
+is_deeply \@records, [{x => 1, c => 2, b => 3, d => 4},
+                      {x => 5, c => 6, b => 7, d => 8}],   'renamed hashes';
+
+
+
+done_testing;

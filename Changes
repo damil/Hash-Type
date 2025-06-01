@@ -1,6 +1,10 @@
 Revision history for Perl extension Hash::Type.
 
-2.00 
+
+2.01
+        - new methods delete(), reorder(), clone() and instantiate() needed for Data::BI::Table
+
+2.00 06.05.2016
         - also behaves as an ordered hash (new NEXTKEY implementation)
         - new methods: values() and each()
         - nested loops with each()/keys()/values() are now supported

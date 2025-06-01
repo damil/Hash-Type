@@ -3,33 +3,55 @@ package Hash::Type;
 use strict;
 use warnings;
 use Carp;
-use Scalar::Util qw/blessed/;
-use List::Util   qw/max/;
+use Scalar::Util    qw/blessed refaddr/;
+use Scalar::Does    qw/does/;
+use List::Util      qw/max/;
+use List::MoreUtils qw/duplicates/;
 
-our $VERSION = "2.00";
+our $VERSION = "2.01";
 
 our $reserved_keys_field = "\0HTkeys\0"; # special reserved hash entry
 
 #----------------------------------------------------------------------
-# constructor
+# constructors
 #----------------------------------------------------------------------
 sub new { # this is a polymorphic 'new', creating either Hash::Type instances
           # from this class, or tied hashes from one of those instance
-  my $obj_or_class = shift;
 
-  if (ref($obj_or_class)) {
-    # create a new tied hash from the Hash::Type instance
+  if (my $class = ref $_[0]) {
+    # used as an instance method => create a new tied hash from this Hash::Type instance
     my %h;
-    tie %h, $obj_or_class , @_;
+    tie %h, $class, @_;
     return \%h;
   }
   else {
-    # create a new Hash::Type instance
-    my $self = {$reserved_keys_field => []};
-    bless $self, $obj_or_class;
-    $self->add(@_);  # add indices for fields given in @_
+    # used as a class method => create a new Hash::Type instance
+    my $class = shift;
+    my $self  = {$reserved_keys_field => []};
+    bless $self, $class;
+    $self->add(@_);  # field names given in @_
     return $self;
   }
+}
+
+
+sub instantiate {  # my @hash_instances = $hash_type->instantiate(@values_list)
+  my $self = shift;
+
+  my $my_refaddr = refaddr $self;
+  my @colnames   = $self->names;
+
+  my @records;
+
+  foreach my $vals (@_) {
+    my $record = does($vals, '@{}') ? $self->new(@$vals)
+               : does($vals, '%{}') ? (refaddr(tied(%$vals)) // 0) == $my_refaddr ? $vals
+                                                                                  : $self->new(@{$vals}{@colnames})
+                :croak "->instantiate() : args should be arrayrefs or hashrefs";
+    push @records, $record;
+  }
+
+  return @records;
 }
 
 
@@ -37,27 +59,25 @@ sub new { # this is a polymorphic 'new', creating either Hash::Type instances
 #----------------------------------------------------------------------
 # tied hash implementation
 #----------------------------------------------------------------------
-sub TIEHASH  { bless [@_], __PACKAGE__                                     }
+sub TIEHASH  { my $class = ref $_[0] || shift; # £_[0] can be either a regular class name or a Hash::Type object
+               bless [@_], $class                                          }
 sub STORE    { my $index = $_[0]->[0]{$_[1]} or
-		 croak "can't STORE, key '$_[1]' was never added "
-                     . "to this Hash::Type";
-	       $_[0]->[$index] = $_[2];                                    }
+                 croak "can't STORE, key '$_[1]' does not belong to this Hash::Type";
+               $_[0]->[$index] = $_[2];                                    }
 
 # FETCH : must be an lvalue because it may be used in $h{field} =~ s/.../../;
 # And since lvalues cannot use "return" (cf. L<perlsub>), we
-# must write it with nested ternary ifs -- not nice to read :-(
-sub FETCH : lvalue { 
-  my $index = $_[0]->[0]{$_[1]};
-  $index ? $_[0]->[$index]
-         : $_[1] eq 'Hash::Type' ? $_[0]->[0]
-                                 : undef;
-}
+# must write it with nested ternary ifs
+sub FETCH
+      :lvalue { my $index = $_[0]->[0]{$_[1]};
+                    $index ? $_[0]->[$index]
+                           : $_[1] eq 'Hash::Type' ? $_[0]->[0]
+                                                   : undef;                }
 
 sub FIRSTKEY { $_[0]->[0]{$reserved_keys_field}[0];                        }
 sub NEXTKEY  { my ($h, $last_key) = @_;
-               my $index_last = $h->[0]{$last_key};        # index on base 1..
-               $h->[0]{$reserved_keys_field}[$index_last]; # .. used on base 0!
-             }
+               my $index_last = $h->[0]{$last_key};                          # index on base 1..
+               $h->[0]{$reserved_keys_field}[$index_last];                 } # .. used on base 0!
 sub EXISTS   { exists $_[0]->[0]{$_[1]}                                    }
 sub DELETE   { croak "DELETE is forbidden on hash tied to " . __PACKAGE__  }
 sub CLEAR    { delete @{$_[0]}[1 .. $#{$_[0]}]                             }
@@ -65,6 +85,7 @@ sub CLEAR    { delete @{$_[0]}[1 .. $#{$_[0]}]                             }
 #----------------------------------------------------------------------
 # Object-oriented methods for dealing with names and values
 #----------------------------------------------------------------------
+
 sub add {
   my $self = shift;
   my $max  = @{$self->{$reserved_keys_field}};
@@ -76,19 +97,110 @@ sub add {
     push @{$self->{$reserved_keys_field}}, $name;
   }
 
-  # return the number of added names
-  return $ix - $max;
+  my $nb_added = $ix - $max;
+  return $nb_added;
 }
+
+sub delete {
+  my $self = shift;
+
+  my @cols_to_delete;
+
+  # iterate on names to delete, remove them from the hash, keep track of corresponding column indices
+ NAME:
+  foreach my $name (@_) {
+    my $ix = delete $self->{$name} or next NAME;
+    push @cols_to_delete, $ix;
+  }
+
+  # sort decreasingly so that we can splice repeatedly from the end of the arrays
+  my @decreasing_cols = sort {$b <=> $a} @cols_to_delete;
+
+  # apply the splicing to the internal list of fields, decrementing the index for columns remaining after
+  my $field_list = $self->{$reserved_keys_field};
+  foreach my $col (@decreasing_cols) {
+    my @names_after = @{$field_list}[$col..$#$field_list];
+    $self->{$_}-- foreach @names_after;
+    splice @$field_list, $col-1, 1;
+  }
+  
+  # return a closure that should be applied to all instances of this hash::type
+  # (otherwise such instances will become inconsistent)
+  return sub {my $tied_hash      = shift;
+              my $internal_array = tied %$tied_hash;
+              my @cols_to_splice = grep {$_ < @$internal_array} @decreasing_cols;
+              splice @$internal_array, $_, 1 foreach @cols_to_splice};
+}
+
+
+sub reorder {
+  my ($self, @reordered_names) = @_;
+
+  my @remap_col;
+
+  # names supplied as arguments take up the initial columns
+  my $ix = 1;
+  foreach my $name (@reordered_names) {
+    my $old_ix = $self->{$name} or croak "->reorder(): key '$name' does not belong to this hash type";
+    $remap_col[$old_ix] = $ix++;
+  }
+
+  # remaining names are pushed to the next column positions
+  my @initial_names   = $self->names;
+  my @remaining_names = grep {!$remap_col[$self->{$_}]} @initial_names;
+  $remap_col[$self->{$_}] = $ix++ foreach @remaining_names;
+
+
+  $self->{$reserved_keys_field} = [@reordered_names, @remaining_names];
+  while (my ($old_ix, $name) = each @initial_names) {
+    $self->{$name} = $remap_col[$old_ix+1];
+  }
+
+  # return a closure that should be applied to all instances of this hash::type
+  # (otherwise such instances wil become inconsistent)
+  $remap_col[0] = 0;                                     # for the first slot of the internal array
+  return sub {my $tied_hash      = shift;
+              my $internal_array = tied %$tied_hash;
+              my @new_array;
+              while (my ($old_ix, $val) = each @$internal_array) {
+                $new_array[$remap_col[$old_ix]] = $val;
+              }
+              @$internal_array = @new_array;
+            };
+}
+
+
+sub rename {
+  my ($self, %remap_names) = @_;
+
+  my @new_name_list             = map {$remap_names{$_} // $_} $self->names;
+  my @conflicts                 = duplicates @new_name_list;
+  !@conflicts or croak "rename() ; name conflicts on " . join ", ", @conflicts;
+  $self->{$reserved_keys_field} = \@new_name_list;
+
+  my @indices = delete @{$self}{keys %remap_names};
+  @{$self}{values %remap_names} = @indices;
+}
+
+
 
 sub names {
   my ($self) = @_;
   return @{$self->{$reserved_keys_field}};
 }
 
+
+sub count {
+  my ($self) = @_;
+  return scalar @{$self->{$reserved_keys_field}};
+}
+
+
 sub values {
   my ($self, $tied_hash) = @_;
-  my $tied = tied %$tied_hash;
-  return @{$tied}[1 .. @{$self->{$reserved_keys_field}}];
+  my $max_index = @{$self->{$reserved_keys_field}};
+  my $tied      = tied %$tied_hash;
+  return @{$tied}[1 .. $max_index];
 }
 
 sub each {
@@ -103,6 +215,19 @@ sub each {
                           : ();
     };
 }
+
+
+sub clone {
+  my $self  = shift;
+  my $class = ref $self;
+  my $clone = {%$self};
+  $clone->{$reserved_keys_field} = [@{$self->{$reserved_keys_field}}];
+
+  bless $clone, $class;
+}
+
+
+
 
 #----------------------------------------------------------------------
 # compiling comparison functions
@@ -139,28 +264,28 @@ sub cmp {
     if (ref $_[$i+1] eq 'CODE') { # ref. to cmp function supplied by caller
       push @caller_sub, $_[$i+1];
       push @cmp, "do {local ($a, $b) = (tied(%$a)->[$ix], tied(%$b)->[$ix]);".
-	             "&{\$caller_sub[$#caller_sub]}}";
+                     "&{\$caller_sub[$#caller_sub]}}";
     }
     else { # builtin comparison operator
       my ($sign, $op) = ("", "cmp");
       my $str;
       if (defined $_[$i+1]) {
-	($sign, $op) = ($_[$i+1] =~ /^\s*([-+]?)\s*(.+)/);
+        ($sign, $op) = ($_[$i+1] =~ /^\s*([-+]?)\s*(.+)/);
       }
 
       for ($op) {
-	/^(alpha|cmp)\s*$/   and do {$str = "%s cmp %s"; last};
-	/^(num|<=>)\s*$/     and do {$str = "%s <=> %s"; last};
-	/^d(\W+)m(\W+)y\s*$/ and do {$regex=qr{(\d+)\Q$1\E(\d+)\Q$2\E(\d+)};
-				     $str = "_date_cmp(\$regex, 0, 1, 2, %s, %s)";
-				     last};
-	/^m(\W+)d(\W+)y\s*$/ and do {$regex=qr{(\d+)\Q$1\E(\d+)\Q$2\E(\d+)};
-				     $str = "_date_cmp(\$regex, 1, 0, 2, %s, %s)";
-				     last};
-	/^y(\W+)m(\W+)d\s*$/ and do {$regex=qr{(\d+)\Q$1\E(\d+)\Q$2\E(\d+)};
-				     $str = "_date_cmp(\$regex, 2, 1, 0, %s, %s)";
-				     last};
-	croak "bad operator for Hash::Type::cmp : $_[$i+1]";
+        /^(alpha|cmp)\s*$/   and do {$str = "%s cmp %s"; last};
+        /^(num|<=>)\s*$/     and do {$str = "%s <=> %s"; last};
+        /^d(\W+)m(\W+)y\s*$/ and do {$regex=qr{(\d+)\Q$1\E(\d+)\Q$2\E(\d+)};
+                                     $str = "_date_cmp(\$regex, 0, 1, 2, %s, %s)";
+                                     last};
+        /^m(\W+)d(\W+)y\s*$/ and do {$regex=qr{(\d+)\Q$1\E(\d+)\Q$2\E(\d+)};
+                                     $str = "_date_cmp(\$regex, 1, 0, 2, %s, %s)";
+                                     last};
+        /^y(\W+)m(\W+)d\s*$/ and do {$regex=qr{(\d+)\Q$1\E(\d+)\Q$2\E(\d+)};
+                                     $str = "_date_cmp(\$regex, 2, 1, 0, %s, %s)";
+                                     last};
+        croak "bad operator for Hash::Type::cmp : $_[$i+1]";
       }
       $str = sprintf("$sign($str)", "tied(%$a)->[$ix]", "tied(%$b)->[$ix]");
       push @cmp, $str;
@@ -213,6 +338,7 @@ Hash::Type - restricted, ordered hashes as arrays tied to a "type" (shared list 
 
   # create and populate some hashes tied to $person_type
   tie my(%wolfgang), $person_type, "wolfgang amadeus", "mozart", "salzburg";
+  # or more verbose : tie my(%wolfgang), 'Hash::Type', $person_type, "wolfgang amadeus", "mozart", "salzburg";
   my $ludwig = $person_type->new("ludwig", "van beethoven", "vienna");
   my $jsb    = $person_type->new;
   $jsb->{city} = "leipzig";
@@ -281,8 +407,8 @@ field names are shared. As it turns out, benchmarks show that this
 goal is not attained : memory usage is about 35% higher than Perl
 native hashes.  However, this module also implements B<restricted
 hashes> (hashes with a fixed set of keys that cannot be expanded) and
-of B<ordered hashes> (the list of keys or list values are returned in
-a fixed order); and for those two functionalities, the performances of
+of B<ordered hashes> (the list of keys or list of values are returned in
+a fixed order); for those two functionalities, the performances of
 C<Hash::Type> are very competitive with respect to those of other
 similar modules, both in terms of CPU and memory usage (see the
 L</"BENCHMARKS"> section at the end of the documentation). In
@@ -300,14 +426,13 @@ spreadsheets or databases.
 
 =head2 new
 
-The C<new()> method is polymorphic : it can be used
-both as a class and as an instance method.
+The C<new()> method has two different uses :
 
 =head3 C<new()> as a class method
 
   my $h_type = Hash::Type->new(@names);
 
-Creates a new instance which holds a collection of names and
+Creates a new Hash::Type I<instance> which holds a collection of names and
 associated indices (technically, this is a hash reference blessed in
 package C<Hash::Type>).  This instance can then be used to generate tied
 hashes.  The list of C<@names> is optional ; names can be added later
@@ -317,9 +442,45 @@ through the C<add> method.
 
   my $tied_hashref = $h_type->new(@vals);
 
-Creates a new tied hash associated to the C<Hash::Type> class and
+Creates a new I<tied hash> associated to the C<Hash::Type> class and
 containing a reference to the C<$h_type> instance.
 Internally, the tied hash is implemented as an array reference.
+
+
+=head2 instantiate
+
+  my @records = $h_type->instantiate(@arrayrefs_or_hashrefs);
+
+Takes a list of input references, and returns a list hashrefs
+tied to the invocant C<$h_type>.
+
+For each reference in the input list :
+
+=over
+
+=item *
+
+if it is an arrayref, its content is passed to the L</new> method
+
+
+=item *
+
+if it is a hashref already tied into exactly the invocant C<$h_type>
+(i.e. if it has the same refaddr), then that reference is simply returned
+
+=item *
+
+for any other hashref (tied or not), values from that hash are extracted
+at key names corresponding to C<< $h_type->names >>; then those
+values are passed to the L</new> method
+
+=item *
+
+otherwise an exception is raised
+
+=back
+
+
 
 =head2 TIE interface
 
@@ -404,6 +565,49 @@ Returns an iterator function that yields pairs of
 ($key, $value) at each call, until reaching an empty list
 at the end of the tied hash.
 This is the same as calling C<each %hash>, but works faster.
+
+
+=head2 delete
+
+  my $mutator = $h_type->delete(@names);
+  $mutator->($_) foreach @instances_of_that_h_type;
+
+Removes the given names from the hash type, shifting to the left any remaining 
+columns (i.e. their column indices will be decremented). Names can be supplied
+in any order. Names unknown in this hash type are ignored.
+
+Since this operation changes the internal structure of the hash type, all
+instances created from that type should be adjusted: therefore a C<$mutator> coderef
+is returned; it is the responsability of the client to invoke that mutator on all
+living instances of the hash type.
+
+Because of the risk of creating incoherences when deleting columns, it is often
+preferable to create a new hash type .. think twice before using this method.
+A usage example is in L<Data::PowerBI::Table>.
+
+=head2 reorder
+
+  my $mutator = $h_type->reorder(@names);
+  $mutator->($_) foreach @instances_of_that_h_type;
+
+Reorders name positions from the hash type. Names supplied as arguments take up the
+initial positions; remaing names are shifted to the next free positions.
+
+Since this operation changes the internal structure of the hash type, all
+instances created from that type should be adjusted: therefore a C<$mutator> coderef
+is returned; it is the responsability of the client to invoke that mutator on all
+living instances of the hash type.
+
+Because of the risk of creating incoherences when reordering columns, it is often
+preferable to create a new hash type .. think twice before using this method.
+A usage example is in L<Data::PowerBI::Table>.
+
+
+=head2 clone
+
+Returns a deep copy of the current hash type.
+
+
 
 =head2 cmp
 
@@ -530,6 +734,9 @@ C<fieldsort> does everything at once (splitting, comparing
 and sorting), whereas C<Hash::Type::cmp> only compares, and
 leaves it to the caller to do the rest.
 
+L<Named tuples|https://docs.python.org/3/library/collections.html#collections.namedtuple>
+in Python are quite similar to the present class.
+
 C<Hash::Type> was primarily designed as a core element
 for implementing rows of data in L<File::Tabular>.
 
@@ -596,7 +803,7 @@ Laurent Dami, C<< <laurent.dami AT cpan dot org>  >>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2005, 2016 by Laurent Dami.
+Copyright 2005-2025 by Laurent Dami.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

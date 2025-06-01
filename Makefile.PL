@@ -4,7 +4,8 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
   NAME           => 'Hash::Type',
   VERSION_FROM   => 'lib/Hash/Type.pm',
-  PREREQ_PM      => {},
+  PREREQ_PM      => { "Scalar::Does" => 0,
+                    },
   ABSTRACT_FROM  => 'lib/Hash/Type.pm',
   AUTHOR         => 'Laurent Dami <dami@cpan.org>',
   META_MERGE => {
